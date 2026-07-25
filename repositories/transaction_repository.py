@@ -1,60 +1,63 @@
-from database import cursor, conn
 from models import Transaction
+from db_models import TransactionDB
+from sqlalchemy.orm import Session
+from fastapi import HTTPException
+from sqlalchemy import select
 
-def select_all()->list:
-    cursor.execute("""SELECT * FROM transactions""")
-    rows = cursor.fetchall()
-    return rows
+def select_all(db : Session)->list:
+    
+    statement = select(TransactionDB)
+    result = db.execute(statement)
+    transactions = result.scalars().all()
+    return transactions
+    
+
+def select_transaction_by_id(id, db : Session):
+   
+    statement = select(TransactionDB).where(TransactionDB.id == id)
+    transaction = db.execute(statement).scalar_one_or_none()
+    if transaction:
+        return transaction
+    else: 
+            raise HTTPException(404, detail="Transaction not found.")
 
 
-def exist_by_id(id):
-    cursor.execute(
-        """SELECT 1 From transactions
-                   WHERE id = ?""",
-        (id,),
+    
+def insert_transaction(transaction : Transaction, db : Session):
+    new_transaction = TransactionDB(
+        type = transaction.type,
+        amount = transaction.amount,
+        category = transaction.category,
+        date = transaction.date_
     )
-    result = cursor.fetchone()
-    return result
+    db.add(new_transaction)
+    db.commit()
 
 
-def insert_transaction(transaction : Transaction):
-    cursor.execute(
-        """INSERT INTO transactions (type, amount, category, date)
-                   VALUES(?, ?, ?, ?)""",
-        (transaction.type, transaction.amount, transaction.category, transaction.date_),
-    )
-    conn.commit()
+def update_transaction(transaction : Transaction, id, db : Session):
+    
+    updating_transaction = db.query(TransactionDB).filter(TransactionDB.id == id).first()
 
+    if updating_transaction:
+        updating_transaction.type = transaction.type
+        updating_transaction.amount = transaction.amount
+        updating_transaction.category = transaction.category
+        updating_transaction.date = transaction.date_
+        
+        db.commit()
+    else: 
+        raise HTTPException(404, detail="Transaction not found.")
+    
 
-def update_transaction(transaction : Transaction, id):
-    cursor.execute(
-        """UPDATE transactions
-                   SET type = ?, amount = ?, category = ?, date = ?
-                   WHERE id = ?""",
-        (
-            transaction.type,
-            transaction.amount,
-            transaction.category,
-            transaction.date_,
-            id,
-        ),
-    )
-    conn.commit()
+def delete_transaction(id, db : Session):
+    
+    transaction = db.query(TransactionDB).filter(TransactionDB.id == id).first()
+    
+    if transaction:
+        db.delete(transaction)
+        db.commit()
+    else: 
+            raise HTTPException(404, detail="Transaction not found.")
+    
 
-
-def delete_transaction(id):
-    cursor.execute(
-        """DELETE FROM transactions 
-                   WHERE id = ?""",
-        (id,),
-    )
-    conn.commit()
-
-def select_row_by_id(id):
-    cursor.execute(
-        """SELECT * FROM transactions
-                   WHERE id = ?""",
-        (id,),
-    )
-    row = cursor.fetchone()
-    return row
+    

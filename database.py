@@ -1,15 +1,19 @@
-import sqlite3
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, declarative_base
 
-conn = sqlite3.connect("expenses.db" ,check_same_thread=False)
+DATABASE_URL = "sqlite:///expenses.db"
 
-cursor = conn.cursor()
+engine = create_engine(DATABASE_URL)
 
-cursor.execute("""CREATE TABLE IF NOT EXISTS transactions (
-               id INTEGER PRIMARY KEY,
-               type TEXT,
-               amount INTEGER,
-               category TEXT,
-               date TEXT)""")
+SessionLocal = sessionmaker(bind= engine)
 
-conn.commit()
+Base = declarative_base()
 
+def get_db():
+
+    db = SessionLocal()
+
+    try:
+        yield db
+    finally:
+        db.close()

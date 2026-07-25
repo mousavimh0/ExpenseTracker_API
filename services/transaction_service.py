@@ -1,56 +1,40 @@
 from fastapi import HTTPException
-from models import Transaction
+from models import Transaction, TransactionResponse
 from repositories import transaction_repository
+from sqlalchemy.orm import Session
+from db_models import TransactionDB
 
-def show_transactions()->list:
-    rows = transaction_repository.select_all()
+def to_response(transaction: TransactionDB):
+    response_items = TransactionResponse(id= transaction.id, type= transaction.type , amount= transaction.amount, category= transaction.category, date_= transaction.date)
+    return response_items
+    
+
+def show_transactions(db : Session )->list:
+    transactions = transaction_repository.select_all(db)
     response_list = []
-    for item in rows:
+    for item in transactions:
         response_list.append(
-            {
-                "id": item[0],
-                "type": item[1],
-                "amount": item[2],
-                "category": item[3],
-                "date_": item[4],
-            }
+            to_response(item)
         )
 
     return response_list
 
 
-def ensure_transaction_exists(id : int)->bool:
-    result = transaction_repository.exist_by_id(id)
-    if result is None:
-        raise HTTPException(status_code=404, detail="id not found")
-    return True
+def add_transaction(transaction: Transaction, db : Session):
+    transaction_repository.insert_transaction(transaction, db)
 
 
-def add_transaction(transaction: Transaction):
-    transaction_repository.insert_transaction(transaction)
+def update_transaction(transaction : Transaction, id: int, db : Session):
+
+    transaction_repository.update_transaction(transaction, id, db)
 
 
-def update_transaction(transaction : Transaction, id: int):
-
-    ensure_transaction_exists(id)
-    transaction_repository.update_transaction(transaction, id)
+def delete_transaction(id: int, db : Session):
+    transaction_repository.delete_transaction(id, db)
 
 
-def delete_transaction(id: int):
-    ensure_transaction_exists(id)
-    transaction_repository.delete_transaction(id)
-
-
-def show_transactions_by_id(id:int)->dict:
-    row = transaction_repository.select_row_by_id(id)
-    if row is None:
-        raise HTTPException(status_code=404, detail="id not found")
-    response_items = {
-                "id": row[0],
-                "type": row[1],
-                "amount": row[2],
-                "category": row[3],
-                "date_": row[4],
-            }
+def show_transactions_by_id(id:int, db : Session)->dict:
+    transaction = transaction_repository.select_transaction_by_id(id, db)
+    response_items = to_response(transaction)
     return response_items
 
