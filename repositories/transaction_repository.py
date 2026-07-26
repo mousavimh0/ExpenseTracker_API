@@ -35,8 +35,9 @@ def insert_transaction(transaction : Transaction, db : Session):
 
 
 def update_transaction(transaction : Transaction, id, db : Session):
-    
-    updating_transaction = db.query(TransactionDB).filter(TransactionDB.id == id).first()
+    statement = select(TransactionDB).where(TransactionDB.id == id)
+    result = db.execute(statement)
+    updating_transaction = result.scalar_one_or_none()
 
     if updating_transaction:
         updating_transaction.type = transaction.type
@@ -50,8 +51,8 @@ def update_transaction(transaction : Transaction, id, db : Session):
     
 
 def delete_transaction(id, db : Session):
-    
-    transaction = db.query(TransactionDB).filter(TransactionDB.id == id).first()
+    statement = select(TransactionDB).where(TransactionDB.id == id)
+    transaction = db.execute(statement).scalar_one_or_none()
     
     if transaction:
         db.delete(transaction)
