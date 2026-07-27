@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, ForeignKey, 
 from app.database import Base 
-
+from sqlalchemy.orm import relationship
 
 class TransactionDB(Base):
     __tablename__ = "transactions"
@@ -10,6 +10,8 @@ class TransactionDB(Base):
     amount = Column(Integer)
     category = Column(String)
     date = Column(String)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user = relationship("UserDB", back_populates="transactions")
 
 class UserDB(Base):
     __tablename__  = "users"
@@ -18,3 +20,4 @@ class UserDB(Base):
     username = Column(String, unique=True, nullable=False)
     email = Column(String, unique=True, nullable=False)
     hashed_password = Column(String, nullable=False)
+    transactions = relationship("TransactionDB", back_populates="user")
