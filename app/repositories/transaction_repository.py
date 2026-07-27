@@ -32,6 +32,8 @@ def insert_transaction(transaction : Transaction, db : Session):
     )
     db.add(new_transaction)
     db.commit()
+    db.refresh(new_transaction)
+    return new_transaction
 
 
 def update_transaction(transaction : Transaction, id, db : Session):
@@ -46,6 +48,8 @@ def update_transaction(transaction : Transaction, id, db : Session):
         updating_transaction.date = transaction.date_
         
         db.commit()
+        db.refresh(updating_transaction)
+        return updating_transaction
     else: 
         raise HTTPException(404, detail="Transaction not found.")
     
