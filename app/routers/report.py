@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from app.schemas.models import BalanceResponse, TransactionResponse, TransactionCategory, TransactionType
+from app.schemas.transaction import BalanceResponse, TransactionResponse, TransactionCategory, TransactionType
 from datetime import date
 from app.services import report_service
 from sqlalchemy.orm import Session

@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from app.schemas.models import Transaction, TransactionResponse
+from app.schemas.transaction import Transaction, TransactionResponse
 from app.repositories import transaction_repository
 from sqlalchemy.orm import Session
 from app.models.db_models import TransactionDB

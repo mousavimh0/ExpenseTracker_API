@@ -1,4 +1,4 @@
-from app.schemas.models import Transaction
+from app.schemas.transaction import Transaction
 from app.models.db_models import TransactionDB
 from sqlalchemy.orm import Session
 from fastapi import HTTPException

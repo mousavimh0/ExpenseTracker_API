@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from app.repositories import report_repository
 from datetime import date 
 from app.models.db_models import TransactionDB
-from app.schemas.models import TransactionResponse, BalanceResponse
+from app.schemas.transaction import TransactionResponse, BalanceResponse
 from fastapi import HTTPException
 
 def to_response(transactions : TransactionDB):

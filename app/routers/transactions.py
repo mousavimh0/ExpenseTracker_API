@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from app.schemas.models import Transaction, TransactionResponse
+from app.schemas.transaction import Transaction, TransactionResponse
 from app.services import transaction_service
 from app.database import get_db
 from sqlalchemy.orm import Session
