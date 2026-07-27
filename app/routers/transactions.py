@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends
-from models import Transaction, TransactionResponse
-from services import transaction_service
-from database import get_db
+from app.schemas.models import Transaction, TransactionResponse
+from app.services import transaction_service
+from app.database import get_db
 from sqlalchemy.orm import Session
+
 transaction_router = APIRouter()
 
 @transaction_router.post("/" , status_code= 201)

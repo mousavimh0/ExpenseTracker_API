@@ -1,5 +1,5 @@
-from models import Transaction
-from db_models import TransactionDB
+from app.schemas.models import Transaction
+from app.models.db_models import TransactionDB
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from sqlalchemy import select

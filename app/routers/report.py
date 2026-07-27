@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends
-from models import BalanceResponse, TransactionResponse, TransactionCategory, TransactionType
+from app.schemas.models import BalanceResponse, TransactionResponse, TransactionCategory, TransactionType
 from datetime import date
-from services import report_service
+from app.services import report_service
 from sqlalchemy.orm import Session
-from database import get_db
-from db_models import TransactionDB
+from app.database import get_db
+from app.models.db_models import TransactionDB
+
 report_router = APIRouter()
 
 @report_router.get("/", response_model = BalanceResponse)

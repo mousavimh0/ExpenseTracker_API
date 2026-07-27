@@ -1,5 +1,28 @@
-test_database.py
-test_query.py
-test_session.py
-test_sqlalchemym.py
+# Virtual Environment
+venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# SQLite databases
+*.db
+
+# Environment variables
+.env
+
+# VS Code
+.vscode/
+
+# Pytest
+.pytest_cache/
+
+# MyPy
+.mypy_cache/
+
+# Ruff
+.ruff_cache/
+
+# macOS
+.DS_Store
 

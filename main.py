@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from routers.transactions import transaction_router
-from routers.report import report_router
+from app.routers.transactions import transaction_router
+from app.routers.report import report_router
 
 app = FastAPI()
 

@@ -1,6 +1,6 @@
 from sqlalchemy import select, func
 from sqlalchemy.orm import Session
-from db_models import TransactionDB
+from app.models.db_models import TransactionDB
 from fastapi import HTTPException
 
 def sum_amount(type, db : Session):

@@ -1,8 +1,8 @@
 from fastapi import HTTPException
-from models import Transaction, TransactionResponse
-from repositories import transaction_repository
+from app.schemas.models import Transaction, TransactionResponse
+from app.repositories import transaction_repository
 from sqlalchemy.orm import Session
-from db_models import TransactionDB
+from app.models.db_models import TransactionDB
 
 def to_response(transaction: TransactionDB):
     response_items = TransactionResponse(id= transaction.id, type= transaction.type , amount= transaction.amount, category= transaction.category, date_= transaction.date)
