@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.models.db_models import UserDB
 from app.repositories import user_repository
 from app.schemas.user import UserCreate, UserUpdate
+from app.core import security
 
 
 def register_user(db: Session, user: UserCreate) -> UserDB | None:
@@ -15,6 +16,8 @@ def register_user(db: Session, user: UserCreate) -> UserDB | None:
     elif user_by_username:
         raise HTTPException(409, "Username already exist")
 
+    hashed_password = security.hash_password(user.password)
+    user.password = hashed_password
     new_user = user_repository.create_user(db, user)
     return new_user
 
