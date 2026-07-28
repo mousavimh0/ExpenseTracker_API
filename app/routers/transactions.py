@@ -6,8 +6,9 @@ from sqlalchemy.orm import Session
 
 transaction_router = APIRouter()
 
-@transaction_router.post("/" , status_code= 201)
-def post_transaction(transaction : Transaction, db: Session = Depends(get_db)):
+
+@transaction_router.post("/", status_code=201)
+def post_transaction(transaction: Transaction, db: Session = Depends(get_db)):
     transaction_service.add_transaction(transaction, db)
     return {"message": "Transaction added"}
 
@@ -19,7 +20,9 @@ def get_all_transactions(db: Session = Depends(get_db)):
 
 
 @transaction_router.put("/{id}")
-def put_transaction_by_id(transaction: Transaction, id: int, db: Session = Depends(get_db)):
+def put_transaction_by_id(
+    transaction: Transaction, id: int, db: Session = Depends(get_db)
+):
     transaction_service.update_transaction(transaction, id, db)
     return {"message": "Transaction edited successfully."}
 
@@ -31,8 +34,6 @@ def delete_transactions(id: int, db: Session = Depends(get_db)):
 
 
 @transaction_router.get("/{id}", response_model=TransactionResponse)
-def get_transaction_by_id(id: int, db : Session= Depends(get_db)):
-    transaction = transaction_service.show_transactions_by_id(id, db)    
+def get_transaction_by_id(id: int, db: Session = Depends(get_db)):
+    transaction = transaction_service.show_transactions_by_id(id, db)
     return transaction
-
-

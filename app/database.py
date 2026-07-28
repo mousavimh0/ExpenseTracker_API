@@ -5,9 +5,10 @@ DATABASE_URL = "sqlite:///expenses.db"
 
 engine = create_engine(DATABASE_URL)
 
-SessionLocal = sessionmaker(bind= engine)
+SessionLocal = sessionmaker(bind=engine)
 
 Base = declarative_base()
+
 
 def get_db():
 
