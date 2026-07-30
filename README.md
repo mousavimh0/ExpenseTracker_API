@@ -1,15 +1,19 @@
 # Expense Tracker API
 
-A RESTful API for tracking income and expenses, built with FastAPI, SQLAlchemy, and SQLite.
+A RESTful API for tracking personal income and expenses, built with FastAPI, SQLAlchemy, and SQLite.
 
 ## Features
 
+- User registration
+- JWT authentication
+- Secure password hashing
 - Create transactions
-- View transactions
-- Update transactions
-- Delete transactions
+- View your own transactions
+- Update your own transactions
+- Delete your own transactions
 - Generate financial reports
 - Filter transactions
+- User-specific data isolation
 
 ## Tech Stack
 
@@ -18,6 +22,9 @@ A RESTful API for tracking income and expenses, built with FastAPI, SQLAlchemy, 
 - SQLAlchemy
 - SQLite
 - Pydantic
+- python-jose (JWT)
+- Passlib
+- bcrypt
 
 ## Installation
 
@@ -39,15 +46,33 @@ uvicorn main:app --reload
 
 ## API Documentation
 
-After running the project:
+After running the project, visit:
 
 ```
 http://127.0.0.1:8000/docs
 ```
 
+## Authentication
+
+The API uses JWT Bearer Authentication.
+
+1. Register a new user.
+2. Login using `/users/login`.
+3. Copy the returned access token.
+4. Click **Authorize** in Swagger UI.
+5. Enter:
+
+```
+Bearer <your_access_token>
+```
+
+All transaction endpoints require authentication and each user can only access their own transactions.
+
 ## Future Improvements
 
-- User authentication
+- Refresh tokens
+- Role-based authorization
 - PostgreSQL support
 - Docker
 - Unit tests
+- CI/CD

@@ -26,7 +26,6 @@ class Transaction(BaseModel):
     amount: int = Field(gt=0)
     category: TransactionCategory
     date_: date
-    user_id: int
 
     @model_validator(mode="after")
     def vlidate_category(self):
