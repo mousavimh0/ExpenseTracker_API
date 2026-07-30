@@ -20,3 +20,8 @@ class UserResponse(BaseModel):
 class UserUpdate(BaseModel):
     username: str
     email: str
+
+
+class UserLogin(BaseModel):
+    identifier: str
+    password: str

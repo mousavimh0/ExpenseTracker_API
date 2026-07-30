@@ -5,17 +5,19 @@ from fastapi import HTTPException
 from sqlalchemy import select
 
 
-def select_all(db: Session) -> list:
+def select_all(db: Session, user_id) -> list:
 
-    statement = select(TransactionDB)
+    statement = select(TransactionDB).where(TransactionDB.user_id == user_id)
     result = db.execute(statement)
     transactions = result.scalars().all()
     return transactions
 
 
-def select_transaction_by_id(id, db: Session):
+def select_transaction_by_id(id, db: Session, user_id):
 
-    statement = select(TransactionDB).where(TransactionDB.id == id)
+    statement = select(TransactionDB).where(
+        TransactionDB.id == id, TransactionDB.user_id == user_id
+    )
     transaction = db.execute(statement).scalar_one_or_none()
     if transaction:
         return transaction
@@ -23,22 +25,27 @@ def select_transaction_by_id(id, db: Session):
         raise HTTPException(404, detail="Transaction not found.")
 
 
-def insert_transaction(transaction: Transaction, db: Session):
-    new_transaction = TransactionDB(
-        type=transaction.type,
-        amount=transaction.amount,
-        category=transaction.category,
-        date_=transaction.date_,
-        user_id=transaction.user_id,
-    )
+def insert_transaction(transaction: Transaction, db: Session, user_id):
+    if transaction.user_id == user_id:
+        new_transaction = TransactionDB(
+            type=transaction.type,
+            amount=transaction.amount,
+            category=transaction.category,
+            date_=transaction.date_,
+            user_id=transaction.user_id,
+        )
+    else:
+        raise HTTPException(403, "you don't have premission for this action.")
     db.add(new_transaction)
     db.commit()
     db.refresh(new_transaction)
     return new_transaction
 
 
-def update_transaction(transaction: Transaction, id, db: Session):
-    statement = select(TransactionDB).where(TransactionDB.id == id)
+def update_transaction(transaction: Transaction, id, db: Session, user_id):
+    statement = select(TransactionDB).where(
+        TransactionDB.id == id, TransactionDB.user_id == user_id
+    )
     result = db.execute(statement)
     updating_transaction = result.scalar_one_or_none()
 
@@ -56,8 +63,10 @@ def update_transaction(transaction: Transaction, id, db: Session):
         raise HTTPException(404, detail="Transaction not found.")
 
 
-def delete_transaction(id, db: Session):
-    statement = select(TransactionDB).where(TransactionDB.id == id)
+def delete_transaction(id, db: Session, user_id):
+    statement = select(TransactionDB).where(
+        TransactionDB.id == id, TransactionDB.user_id == user_id
+    )
     transaction = db.execute(statement).scalar_one_or_none()
 
     if transaction:

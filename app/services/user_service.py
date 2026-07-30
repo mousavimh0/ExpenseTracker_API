@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.models.db_models import UserDB
 from app.repositories import user_repository
-from app.schemas.user import UserCreate, UserUpdate
+from app.schemas.user import UserCreate, UserUpdate, UserLogin
 from app.core import security
 
 
@@ -47,3 +47,20 @@ def user_update(db: Session, id: int, user: UserUpdate) -> UserDB | None:
     select_user_by_id(db, id)
     updated_user = user_repository.update_user_by_id(db, id, user)
     return updated_user
+
+
+def user_login(user: UserLogin, db: Session) -> bool:
+    if "@" in user.identifier:
+        current_user = user_repository.get_user_by_email(db, user.identifier)
+        if not current_user:
+            raise HTTPException(401, "Invalid username/email or password")
+    else:
+        current_user = user_repository.get_user_by_username(db, user.identifier)
+        if not current_user:
+            raise HTTPException(401, "Invalid username/email or password")
+
+    if security.verify_password(user.password, current_user.hashed_password):
+        token = security.create_access_token({"sub": str(current_user.id)})
+        return token
+    else:
+        raise HTTPException(401, "Invalid username/email or password")
