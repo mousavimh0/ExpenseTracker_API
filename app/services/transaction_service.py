@@ -13,15 +13,21 @@ def show_transactions(db: Session, user_id) -> list[TransactionDB]:
 
 
 def add_transaction(transaction: Transaction, db: Session, user_id):
-    user = user_repository.get_user_by_id(db, transaction.user_id)
+    user = user_repository.get_user_by_id(db, user_id)
     if not user:
         raise HTTPException(404, "user not found")
-    transaction_repository.insert_transaction(transaction, db, user_id)
+    new_transaction = transaction_repository.insert_transaction(
+        transaction, db, user_id
+    )
+    return new_transaction
 
 
 def update_transaction(transaction: Transaction, id: int, db: Session, user_id):
 
-    transaction_repository.update_transaction(transaction, id, db, user_id)
+    updating_transaction = transaction_repository.update_transaction(
+        transaction, id, db, user_id
+    )
+    return updating_transaction
 
 
 def delete_transaction(id: int, db: Session, user_id):

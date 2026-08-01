@@ -26,16 +26,14 @@ def select_transaction_by_id(id, db: Session, user_id):
 
 
 def insert_transaction(transaction: Transaction, db: Session, user_id):
-    if transaction.user_id == user_id:
-        new_transaction = TransactionDB(
-            type=transaction.type,
-            amount=transaction.amount,
-            category=transaction.category,
-            date_=transaction.date_,
-            user_id=transaction.user_id,
-        )
-    else:
-        raise HTTPException(403, "you don't have premission for this action.")
+
+    new_transaction = TransactionDB(
+        type=transaction.type,
+        amount=transaction.amount,
+        category=transaction.category,
+        date_=transaction.date_,
+        user_id=user_id,
+    )
     db.add(new_transaction)
     db.commit()
     db.refresh(new_transaction)
@@ -54,7 +52,7 @@ def update_transaction(transaction: Transaction, id, db: Session, user_id):
         updating_transaction.amount = transaction.amount
         updating_transaction.category = transaction.category
         updating_transaction.date_ = transaction.date_
-        updating_transaction.user_id = transaction.user_id
+        updating_transaction.user_id = user_id
 
         db.commit()
         db.refresh(updating_transaction)

@@ -66,3 +66,11 @@ def login(
     user = UserLogin(identifier=form_data.username, password=form_data.password)
     token = user_service.user_login(user, db)
     return {"access_token": token, "token_type": "bearer"}
+
+
+@user_router.get("/user/me", response_model=UserResponse)
+def show_my_informatin(
+    db: Session = Depends(get_db), current_user: UserDB = Depends(get_current_user)
+):
+    user = user_service.select_user_by_id(db, current_user.id)
+    return user
