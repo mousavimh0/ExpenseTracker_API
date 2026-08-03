@@ -51,6 +51,7 @@ def update_user_by_id(db: Session, id: int, user: UserUpdate):
     updating_user = get_user_by_id(db, id)
     updating_user.username = user.username
     updating_user.email = user.email
+    updating_user.role = user.role
     db.commit()
     db.refresh(updating_user)
     return updating_user

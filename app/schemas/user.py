@@ -1,5 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 from app.schemas.transaction import TransactionResponse
+from enum import Enum
 
 
 class UserCreate(BaseModel):
@@ -17,9 +18,15 @@ class UserResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class UserRole(str, Enum):
+    ADMIN = "admin"
+    USER = "user"
+
+
 class UserUpdate(BaseModel):
     username: str
     email: str
+    role: UserRole
 
 
 class UserLogin(BaseModel):

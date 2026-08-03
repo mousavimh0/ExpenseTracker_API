@@ -14,11 +14,22 @@ def get_current_user(
     token: str = Depends(oauth2_scheme),
     db: Session = Depends(get_db),
 ):
-    print("token =", repr(token))
+
     payload = security.decode_access_token(token)
     user_id = payload.get("sub")
+
     if not user_id:
         raise HTTPException(401, "inavalid token")
     current_user = user_repository.get_user_by_id(db, int(user_id))
 
     return current_user
+
+
+def require_role(role: str):
+    def checker(current_user=Depends(get_current_user)):
+        if current_user.role != role:
+            raise HTTPException(status_code=403, detail="Not enough permissions")
+
+        return current_user
+
+    return checker

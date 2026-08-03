@@ -62,7 +62,9 @@ def user_login(user: UserLogin, db: Session) -> bool:
             raise HTTPException(401, "Invalid username/email or password")
 
     if security.verify_password(user.password, current_user.hashed_password):
-        token = security.create_access_token({"sub": str(current_user.id)})
+        token = security.create_access_token(
+            {"sub": str(current_user.id), "role": current_user.role}
+        )
         return token
     else:
         raise HTTPException(401, "Invalid username/email or password")

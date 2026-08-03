@@ -5,7 +5,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from app.database import get_db
 from app.services import user_service
 from app.schemas.user import UserResponse, UserCreate, UserUpdate, UserLogin
-from app.dependencies.auth import get_current_user
+from dependencies.auth import require_role, get_current_user
 from app.models.db_models import UserDB
 
 user_router = APIRouter()
@@ -19,7 +19,7 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)) -> UserResponse
 
 @user_router.get("/show", response_model=list[UserResponse])
 def show_all_users(
-    db: Session = Depends(get_db), current_user: UserDB = Depends(get_current_user)
+    db: Session = Depends(get_db), current_user: UserDB = Depends(require_role("admin"))
 ) -> list[UserResponse]:
     users = user_service.select_all_users(db)
     return users
@@ -29,7 +29,7 @@ def show_all_users(
 def show_usere_by_id(
     id: int,
     db: Session = Depends(get_db),
-    current_user: UserDB = Depends(get_current_user),
+    current_user: UserDB = Depends(require_role("admin")),
 ) -> UserResponse:
     user = user_service.select_user_by_id(db, id)
     return user
@@ -39,7 +39,7 @@ def show_usere_by_id(
 def delete_user_by_id(
     id: int,
     db: Session = Depends(get_db),
-    current_user: UserDB = Depends(get_current_user),
+    current_user: UserDB = Depends(require_role("admin")),
 ) -> dict:
     user_service.delete_user_by_id(db, id)
 
@@ -51,7 +51,7 @@ def update_user_by_id(
     id,
     user: UserUpdate,
     db: Session = Depends(get_db),
-    current_user: UserDB = Depends(get_current_user),
+    current_user: UserDB = Depends(require_role("admin")),
 ) -> UserResponse:
     updating_user = user_service.user_update(db, id, user)
 
