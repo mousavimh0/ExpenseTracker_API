@@ -15,8 +15,10 @@ def post_transaction(
     db: Session = Depends(get_db),
     current_user: UserDB = Depends(get_current_user),
 ):
-    transaction_service.add_transaction(transaction, db, current_user.id)
-    return {"message": "Transaction added"}
+    new_transaction = transaction_service.add_transaction(
+        transaction, db, current_user.id
+    )
+    return new_transaction
 
 
 @transaction_router.get("/", response_model=list[TransactionResponse])
@@ -34,9 +36,11 @@ def put_transaction_by_id(
     db: Session = Depends(get_db),
     current_user: UserDB = Depends(get_current_user),
 ):
-    transaction_service.update_transaction(transaction, id, db, current_user.id)
+    updating_transaction = transaction_service.update_transaction(
+        transaction, id, db, current_user.id
+    )
 
-    return {"message": "Transaction edited successfully."}
+    return updating_transaction
 
 
 @transaction_router.delete("/{id}")

@@ -35,8 +35,8 @@ def get_all_users(db: Session) -> list[UserDB] | None:
     return users
 
 
-def get_user_by_id(db: Session, id: int) -> UserDB | None:
-    statement = select(UserDB).where(UserDB.id == id)
+def get_user_by_id(db: Session, user_id) -> UserDB | None:
+    statement = select(UserDB).where(UserDB.id == user_id)
     user = db.execute(statement).scalar_one_or_none()
     return user
 

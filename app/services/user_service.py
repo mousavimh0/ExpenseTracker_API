@@ -22,7 +22,9 @@ def register_user(db: Session, user: UserCreate) -> UserDB | None:
     return new_user
 
 
-def select_all_users(db: Session) -> list[UserDB] | None:
+def select_all_users(
+    db: Session,
+) -> list[UserDB] | None:
     users = user_repository.get_all_users(db)
     if users:
         return users
@@ -30,8 +32,8 @@ def select_all_users(db: Session) -> list[UserDB] | None:
         raise HTTPException(404, "users not found.")
 
 
-def select_user_by_id(db: Session, id: int) -> UserDB | None:
-    user = user_repository.get_user_by_id(db, id)
+def select_user_by_id(db: Session, user_id) -> UserDB | None:
+    user = user_repository.get_user_by_id(db, user_id)
     if user:
         return user
     else:

@@ -29,3 +29,4 @@ class UserDB(Base):
     transactions = relationship(
         "TransactionDB", back_populates="user", cascade="all, delete-orphan"
     )
+    created_at = Column(String)
