@@ -1,10 +1,15 @@
-from fastapi import HTTPException
 from sqlalchemy.orm import Session
+
 
 from app.models.db_models import UserDB
 from app.repositories import user_repository
 from app.schemas.user import UserCreate, UserUpdate, UserLogin
 from app.core import security
+from app.core.expetions import (
+    AuthenticationException,
+    NotFoundException,
+    AlreadyExistException,
+)
 
 
 def register_user(db: Session, user: UserCreate) -> UserDB | None:
@@ -12,9 +17,9 @@ def register_user(db: Session, user: UserCreate) -> UserDB | None:
     user_by_username = user_repository.get_user_by_username(db, user.username)
 
     if user_by_email:
-        raise HTTPException(409, "Email already exist")
+        raise AlreadyExistException("Already exist", "Email already exist")
     elif user_by_username:
-        raise HTTPException(409, "Username already exist")
+        raise AlreadyExistException("Already exist", "Username already exist")
 
     hashed_password = security.hash_password(user.password)
     user.password = hashed_password
@@ -29,7 +34,7 @@ def select_all_users(
     if users:
         return users
     else:
-        raise HTTPException(404, "users not found.")
+        raise NotFoundException("Not found", "User not found")
 
 
 def select_user_by_id(db: Session, user_id) -> UserDB | None:
@@ -37,7 +42,7 @@ def select_user_by_id(db: Session, user_id) -> UserDB | None:
     if user:
         return user
     else:
-        raise HTTPException(404, "user not found")
+        raise NotFoundException("Not found", "User not found")
 
 
 def delete_user_by_id(db: Session, id: int) -> None:
@@ -55,11 +60,15 @@ def user_login(user: UserLogin, db: Session) -> bool:
     if "@" in user.identifier:
         current_user = user_repository.get_user_by_email(db, user.identifier)
         if not current_user:
-            raise HTTPException(401, "Invalid username/email or password")
+            raise AuthenticationException(
+                "Authentication faild", "Wrong password or email"
+            )
     else:
         current_user = user_repository.get_user_by_username(db, user.identifier)
         if not current_user:
-            raise HTTPException(401, "Invalid username/email or password")
+            raise AuthenticationException(
+                "Authentication faild", "Wrong password or email"
+            )
 
     if security.verify_password(user.password, current_user.hashed_password):
         token = security.create_access_token(
@@ -67,4 +76,4 @@ def user_login(user: UserLogin, db: Session) -> bool:
         )
         return token
     else:
-        raise HTTPException(401, "Invalid username/email or password")
+        raise AuthenticationException("Authentication faild", "Wrong password or email")
