@@ -7,6 +7,8 @@ from app.core.expetions import (
     PermissionException,
     AuthenticationException,
     AlreadyExistException,
+    ExpiredTokenException,
+    InvalidTokenException,
 )
 
 
@@ -31,4 +33,16 @@ async def autentication_handler(request: Request, exc: AuthenticationException):
 async def already_exist_handler(request: Request, exc: AlreadyExistException):
     return JSONResponse(
         status_code=409, content={"error": exc.error, "message": exc.message}
+    )
+
+
+async def expierd_token_handler(request: Request, exc: ExpiredTokenException):
+    return JSONResponse(
+        status_code=498, content={"error": exc.error, "message": exc.message}
+    )
+
+
+async def invalid_token_handler(request: Request, exc: InvalidTokenException):
+    return JSONResponse(
+        status_code=498, content={"error": exc.error, "message": exc.message}
     )

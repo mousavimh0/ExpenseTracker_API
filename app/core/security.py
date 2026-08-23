@@ -1,7 +1,9 @@
 from passlib.context import CryptContext
 from jose import jwt
+from jose.exceptions import ExpiredSignatureError, JWTError
 from datetime import timedelta, datetime, timezone
 from app.core.settings import settings
+from app.core.expetions import ExpiredTokenException, InvalidTokenException
 
 pwd_context = CryptContext(
     schemes=["bcrypt"],
@@ -40,5 +42,10 @@ def create_access_token(
 
 
 def decode_access_token(token: str):
-    payload = jwt.decode(token, settings.SECRET_KEY, settings.ALGORITHM)
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, settings.ALGORITHM)
+    except ExpiredSignatureError:
+        raise ExpiredTokenException("Token expired", "Token is expired")
+    except JWTError:
+        raise InvalidTokenException("invalid token", "Token is invalid")
     return payload
