@@ -6,8 +6,8 @@ from app.repositories import transaction_repository, user_repository
 from app.models.db_models import TransactionDB, UserDB
 
 
-def show_transactions(db: Session, user_id) -> list[TransactionDB]:
-    transactions = transaction_repository.select_all(db, user_id)
+def show_transactions(db: Session, user_id, skip, limit) -> list[TransactionDB]:
+    transactions = transaction_repository.select_all(db, user_id, skip, limit)
 
     return transactions
 

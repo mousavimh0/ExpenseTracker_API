@@ -23,9 +23,14 @@ def post_transaction(
 
 @transaction_router.get("/", response_model=list[TransactionResponse])
 def get_all_transactions(
-    db: Session = Depends(get_db), current_user: UserDB = Depends(get_current_user)
+    skip: int = 0,
+    limit: int = 20,
+    db: Session = Depends(get_db),
+    current_user: UserDB = Depends(get_current_user),
 ):
-    transactions = transaction_service.show_transactions(db, current_user.id)
+    transactions = transaction_service.show_transactions(
+        db, current_user.id, skip, limit
+    )
     return transactions
 
 

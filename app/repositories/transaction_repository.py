@@ -5,9 +5,14 @@ from fastapi import HTTPException
 from sqlalchemy import select
 
 
-def select_all(db: Session, user_id) -> list:
+def select_all(db: Session, user_id, skip, limit) -> list:
 
-    statement = select(TransactionDB).where(TransactionDB.user_id == user_id)
+    statement = (
+        select(TransactionDB)
+        .where(TransactionDB.user_id == user_id)
+        .offset(skip)
+        .limit(limit)
+    )
     result = db.execute(statement)
     transactions = result.scalars().all()
     return transactions
