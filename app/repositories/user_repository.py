@@ -19,9 +19,9 @@ def get_user_by_username(db: Session, username: str) -> UserDB | None:
     return user
 
 
-def create_user(db: Session, user: UserCreate) -> UserDB:
+def create_user(db: Session, user: UserCreate, hashed_pw) -> UserDB:
     new_user = UserDB(
-        username=user.username, email=user.email, hashed_password=user.password
+        username=user.username, email=user.email, hashed_password=hashed_pw
     )
     db.add(new_user)
     db.commit()

@@ -22,8 +22,7 @@ def register_user(db: Session, user: UserCreate) -> UserDB | None:
         raise AlreadyExistException("Already exist", "Username already exist")
 
     hashed_password = security.hash_password(user.password)
-    user.password = hashed_password
-    new_user = user_repository.create_user(db, user)
+    new_user = user_repository.create_user(db, user, hashed_pw=hashed_password)
     return new_user
 
 
