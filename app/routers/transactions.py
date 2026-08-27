@@ -9,7 +9,7 @@ from app.models.db_models import UserDB
 transaction_router = APIRouter()
 
 
-@transaction_router.post("/", status_code=201)
+@transaction_router.post("/create", status_code=201)
 def post_transaction(
     transaction: Transaction,
     db: Session = Depends(get_db),
@@ -18,10 +18,10 @@ def post_transaction(
     new_transaction = transaction_service.add_transaction(
         transaction, db, current_user.id
     )
-    return new_transaction
+    return {"id": new_transaction.id, "type": new_transaction.type}
 
 
-@transaction_router.get("/", response_model=list[TransactionResponse])
+@transaction_router.get("/get", response_model=list[TransactionResponse])
 def get_all_transactions(
     skip: int = 0,
     limit: int = 20,
@@ -58,7 +58,7 @@ def delete_transactions(
     return {"message": "Transaction deleted successfully"}
 
 
-@transaction_router.get("/{id}", response_model=TransactionResponse)
+@transaction_router.get("get/{id}", response_model=TransactionResponse)
 def get_transaction_by_id(
     id: int,
     db: Session = Depends(get_db),
