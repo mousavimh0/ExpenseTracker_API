@@ -9,18 +9,19 @@ class UserCreate(BaseModel):
     password: str
 
 
+class UserRole(str, Enum):
+    ADMIN = "admin"
+    USER = "user"
+
+
 class UserResponse(BaseModel):
     id: int
     username: str
     email: str
     transactions: list[TransactionResponse]
+    role: UserRole
 
     model_config = ConfigDict(from_attributes=True)
-
-
-class UserRole(str, Enum):
-    ADMIN = "admin"
-    USER = "user"
 
 
 class UserUpdate(BaseModel):

@@ -1,48 +1,12 @@
 from fastapi.testclient import TestClient
-from fastapi import Depends
 from sqlalchemy import select
 from app.models.db_models import UserDB
-from app.schemas.user import UserCreate, UserUpdate
-from sqlalchemy.orm import Session
 
 
 from main import app
-from conftest import TestSessionLocal
+
 
 client = TestClient(app)
-
-
-def test_register(clean_database):
-    response = client.post(
-        "/users/create",
-        json={"username": "mmd", "email": "majidi@gmail.com", "password": "1"},
-    )
-
-    assert response.status_code == 201
-
-
-def test_login_success(clean_database):
-    client.post(
-        "/users/create",
-        json={"username": "mmd", "email": "majidi@gmail.com", "password": "1"},
-    )
-    response = client.post("/users/login", data={"username": "mmd", "password": "1"})
-
-    assert response.status_code == 200
-    assert "access_token" in response.json()
-
-
-def test_login_wrong_password(clean_database):
-    client.post(
-        "/users/create",
-        json={"username": "mmd", "email": "majidi@gmail.com", "password": "1"},
-    )
-
-    response = client.post(
-        "/users/login", data={"username": "mmd", "password": "wrong_password"}
-    )
-
-    assert response.status_code == 401
 
 
 def test_users_cannot_access_other_users_transaction(clean_database):

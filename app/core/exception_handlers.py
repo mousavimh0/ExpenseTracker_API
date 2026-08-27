@@ -2,7 +2,7 @@ from fastapi import Request
 from fastapi.responses import JSONResponse
 
 
-from app.core.expetions import (
+from app.core.exeptions import (
     NotFoundException,
     PermissionException,
     AuthenticationException,

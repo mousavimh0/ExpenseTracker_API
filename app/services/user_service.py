@@ -5,7 +5,7 @@ from app.models.db_models import UserDB
 from app.repositories import user_repository
 from app.schemas.user import UserCreate, UserUpdate, UserLogin
 from app.core import security
-from app.core.expetions import (
+from app.core.exeptions import (
     AuthenticationException,
     NotFoundException,
     AlreadyExistException,

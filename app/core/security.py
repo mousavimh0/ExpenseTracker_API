@@ -3,7 +3,7 @@ from jose import jwt
 from jose.exceptions import ExpiredSignatureError, JWTError
 from datetime import timedelta, datetime, timezone
 from app.core.settings import settings
-from app.core.expetions import ExpiredTokenException, InvalidTokenException
+from app.core.exeptions import ExpiredTokenException, InvalidTokenException
 
 pwd_context = CryptContext(
     schemes=["bcrypt"],
@@ -26,7 +26,7 @@ def create_access_token(
 
     payload = data.copy()
 
-    if expires_delta:
+    if expires_delta is not None:
         expire = datetime.now(timezone.utc) + expires_delta
 
     else:

@@ -6,7 +6,7 @@ from app.routers.report import report_router
 from app.database import engine, Base
 from app.models import db_models
 from app.routers.user import user_router
-from app.core.expetions import (
+from app.core.exeptions import (
     NotFoundException,
     PermissionException,
     AuthenticationException,
