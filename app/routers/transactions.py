@@ -34,7 +34,7 @@ def get_all_transactions(
     return transactions
 
 
-@transaction_router.put("/{id}")
+@transaction_router.put("/update/{id}")
 def put_transaction_by_id(
     transaction: Transaction,
     id: int,
@@ -48,7 +48,7 @@ def put_transaction_by_id(
     return updating_transaction
 
 
-@transaction_router.delete("/{id}")
+@transaction_router.delete("/delete/{id}")
 def delete_transactions(
     id: int,
     db: Session = Depends(get_db),
@@ -58,7 +58,7 @@ def delete_transactions(
     return {"message": "Transaction deleted successfully"}
 
 
-@transaction_router.get("get/{id}", response_model=TransactionResponse)
+@transaction_router.get("/get/{id}", response_model=TransactionResponse)
 def get_transaction_by_id(
     id: int,
     db: Session = Depends(get_db),
