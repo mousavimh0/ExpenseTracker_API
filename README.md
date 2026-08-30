@@ -1,6 +1,6 @@
 # Expense Tracker API
 
-A RESTful API for tracking personal income and expenses, built with FastAPI, SQLAlchemy, SQLite, and Alembic.
+A RESTful API for tracking personal income and expenses, built with FastAPI, SQLAlchemy, PostgreSQL, and Alembic.
 
 ## Features
 
@@ -15,9 +15,12 @@ A RESTful API for tracking personal income and expenses, built with FastAPI, SQL
 * Delete your own transactions
 * Generate financial reports
 * Filter transactions
+* Pagination
 * User-specific data isolation
 * Admin-only user management endpoints
 * Database schema versioning with Alembic
+* PostgreSQL database support
+* Automated API tests
 
 ## Tech Stack
 
@@ -25,11 +28,12 @@ A RESTful API for tracking personal income and expenses, built with FastAPI, SQL
 * FastAPI
 * SQLAlchemy
 * Alembic
-* SQLite
+* PostgreSQL
 * Pydantic
 * python-jose (JWT)
 * Passlib
 * bcrypt
+* Psycopg
 
 ## Installation
 
@@ -42,6 +46,69 @@ source venv/bin/activate
 
 pip install -r requirements.txt
 ```
+
+## PostgreSQL Setup
+
+### 1. Install PostgreSQL
+
+On Debian-based Linux:
+
+```bash
+sudo apt install postgresql postgresql-client
+```
+
+Check the installation:
+
+```bash
+psql --version
+```
+
+### 2. Create a PostgreSQL User
+
+Connect to PostgreSQL as the administrator:
+
+```bash
+sudo -u postgres psql
+```
+
+Create the project database user:
+
+```sql
+CREATE USER expense_user WITH PASSWORD 'your_password';
+```
+
+### 3. Create the Database
+
+```sql
+CREATE DATABASE expense_tracker OWNER expense_user;
+```
+
+Exit PostgreSQL:
+
+```sql
+\q
+```
+
+### 4. Test the Connection
+
+```bash
+psql -U expense_user -d expense_tracker -h localhost
+```
+
+### 5. Configure Environment Variables
+
+Create a `.env` file based on `.env.example`.
+
+Example:
+
+```env
+DATABASE_URL=postgresql+psycopg://expense_user:your_password@localhost:5432/expense_tracker
+SECRET_KEY=your_secret_key
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+```
+
+Do not commit the `.env` file to Git.
 
 ## Database Migration
 
@@ -109,15 +176,35 @@ Role-based access is handled using FastAPI dependencies to restrict access to sp
 
 ## Database
 
-The project uses SQLite with SQLAlchemy ORM.
+The project uses PostgreSQL with SQLAlchemy ORM.
 
-Database changes are managed using Alembic migrations.
+Database schema changes are managed using Alembic migrations.
+
+The application database URL is loaded from the `.env` file.
+
+## Testing
+
+The test suite uses a separate PostgreSQL database.
+
+Run all tests with:
+
+```bash
+python -m pytest
+```
+
+The tests cover:
+
+* Authentication
+* User management
+* RBAC authorization
+* Transaction CRUD operations
+* Transaction ownership
+* Transaction validation
+* Pagination
+* PostgreSQL data persistence
 
 ## Future Improvements
 
 * Refresh tokens
-* PostgreSQL support
 * Docker
-* Unit tests
 * CI/CD
-

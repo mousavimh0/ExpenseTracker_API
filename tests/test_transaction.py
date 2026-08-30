@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 from sqlalchemy import select
-from app.models.db_models import UserDB
+from app.models.db_models import TransactionDB
 
 
 from main import app
@@ -635,3 +635,42 @@ def test_pagination_user_can_only_see_all_owned_transactions(clean_database):
     mmd_transactions: list = response.json()
 
     assert len(mmd_transactions) == 2
+
+
+def test_transaction_is_saved_in_postgresql(clean_database, db):
+    client.post(
+        "/users/create",
+        json={
+            "username": "ali",
+            "email": "ali@gmail.com",
+            "password": "1",
+        },
+    )
+    login_response = client.post(
+        "/users/login",
+        data={
+            "username": "ali",
+            "password": "1",
+        },
+    )
+
+    token = login_response.json()["access_token"]
+    response = client.post(
+        "/transactions/create",
+        json={
+            "type": "income",
+            "amount": 500,
+            "category": "salary",
+            "date_": "2026-08-26",
+        },
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    transaction_id = response.json()["id"]
+    statement = select(TransactionDB).where(TransactionDB.id == transaction_id)
+
+    transaction = db.execute(statement).scalar_one_or_none()
+
+    assert transaction is not None
+    assert transaction.amount == 500
+    assert transaction.category == "salary"

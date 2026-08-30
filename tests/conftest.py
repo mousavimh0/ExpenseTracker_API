@@ -6,7 +6,9 @@ from sqlalchemy.orm import sessionmaker
 from main import app
 from app.database import Base, get_db
 
-TEST_DATABASE_URL = "sqlite:///test.db"
+TEST_DATABASE_URL = (
+    "postgresql+psycopg://expense_user:33338020@localhost/expense_tracker_test"
+)
 
 test_engine = create_engine(TEST_DATABASE_URL)
 

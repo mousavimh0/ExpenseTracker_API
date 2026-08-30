@@ -3,6 +3,7 @@ from app.models.db_models import TransactionDB
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from sqlalchemy import select
+from app.core import exeptions
 
 
 def select_all(db: Session, user_id, skip, limit) -> list:
@@ -27,7 +28,7 @@ def select_transaction_by_id(id, db: Session, user_id):
     if transaction:
         return transaction
     else:
-        raise HTTPException(404, detail="Transaction not found.")
+        raise exeptions.NotFoundException("not found", "transaction not found.")
 
 
 def insert_transaction(transaction: Transaction, db: Session, user_id):
@@ -63,7 +64,7 @@ def update_transaction(transaction: Transaction, id, db: Session, user_id):
         db.refresh(updating_transaction)
         return updating_transaction
     else:
-        raise HTTPException(404, detail="Transaction not found.")
+        raise exeptions.NotFoundException("not found", "transaction not found.")
 
 
 def delete_transaction(id, db: Session, user_id):
@@ -76,4 +77,4 @@ def delete_transaction(id, db: Session, user_id):
         db.delete(transaction)
         db.commit()
     else:
-        raise HTTPException(404, detail="Transaction not found.")
+        raise exeptions.NotFoundException("not found", "transaction not found.")

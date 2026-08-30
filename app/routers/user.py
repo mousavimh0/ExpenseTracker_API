@@ -48,7 +48,7 @@ def delete_user_by_id(
 
 @user_router.put("/update/{id}", response_model=UserResponse)
 def update_user_by_id(
-    id,
+    id: int,
     user: UserUpdate,
     db: Session = Depends(get_db),
     current_user: UserDB = Depends(require_role("admin")),
