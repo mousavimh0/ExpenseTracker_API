@@ -244,3 +244,171 @@ def test_user_can_only_see_all_owned_transactions(clean_database):
     mmd_transactions: list = response.json()
 
     assert len(mmd_transactions) == 1
+
+
+def test_amount_field_cannot_be_zero(clean_database):
+    client.post(
+        "/users/create",
+        json={"username": "ali", "email": "ali@gmail.com", "password": "1"},
+    )
+
+    ali_login_response = client.post(
+        "/users/login", data={"username": "ali", "password": "1"}
+    )
+    ali_token = ali_login_response.json()["access_token"]
+
+    ali_create_transaction_response = client.post(
+        "/transactions/create",
+        json={
+            "type": "income",
+            "amount": 0,
+            "category": "salary",
+            "date_": "2026-08-26",
+        },
+        headers={"Authorization": f"Bearer {ali_token}"},
+    )
+    assert ali_create_transaction_response.status_code == 422
+
+
+def test_amount_field_cannot_be_negative(clean_database):
+    client.post(
+        "/users/create",
+        json={"username": "ali", "email": "ali@gmail.com", "password": "1"},
+    )
+
+    ali_login_response = client.post(
+        "/users/login", data={"username": "ali", "password": "1"}
+    )
+    ali_token = ali_login_response.json()["access_token"]
+
+    ali_create_transaction_response = client.post(
+        "/transactions/create",
+        json={
+            "type": "income",
+            "amount": -1,
+            "category": "salary",
+            "date_": "2026-08-26",
+        },
+        headers={"Authorization": f"Bearer {ali_token}"},
+    )
+    assert ali_create_transaction_response.status_code == 422
+
+
+def test_invalid_type_income_vs_category_food(clean_database):
+    client.post(
+        "/users/create",
+        json={"username": "ali", "email": "ali@gmail.com", "password": "1"},
+    )
+
+    ali_login_response = client.post(
+        "/users/login", data={"username": "ali", "password": "1"}
+    )
+    ali_token = ali_login_response.json()["access_token"]
+
+    ali_create_transaction_response = client.post(
+        "/transactions/create",
+        json={
+            "type": "income",
+            "amount": 100,
+            "category": "food",
+            "date_": "2026-08-26",
+        },
+        headers={"Authorization": f"Bearer {ali_token}"},
+    )
+    assert ali_create_transaction_response.status_code == 422
+
+
+def test_valid_type_income_vs_category_salary(clean_database):
+    client.post(
+        "/users/create",
+        json={"username": "ali", "email": "ali@gmail.com", "password": "1"},
+    )
+
+    ali_login_response = client.post(
+        "/users/login", data={"username": "ali", "password": "1"}
+    )
+    ali_token = ali_login_response.json()["access_token"]
+
+    ali_create_transaction_response = client.post(
+        "/transactions/create",
+        json={
+            "type": "income",
+            "amount": 100,
+            "category": "salary",
+            "date_": "2026-08-26",
+        },
+        headers={"Authorization": f"Bearer {ali_token}"},
+    )
+    assert ali_create_transaction_response.status_code == 201
+
+
+def test_valid_type_expense_vs_category_food(clean_database):
+    client.post(
+        "/users/create",
+        json={"username": "ali", "email": "ali@gmail.com", "password": "1"},
+    )
+
+    ali_login_response = client.post(
+        "/users/login", data={"username": "ali", "password": "1"}
+    )
+    ali_token = ali_login_response.json()["access_token"]
+
+    ali_create_transaction_response = client.post(
+        "/transactions/create",
+        json={
+            "type": "expense",
+            "amount": 100,
+            "category": "food",
+            "date_": "2026-08-26",
+        },
+        headers={"Authorization": f"Bearer {ali_token}"},
+    )
+    assert ali_create_transaction_response.status_code == 201
+
+
+def test_invalid_future_date(clean_database):
+    client.post(
+        "/users/create",
+        json={"username": "ali", "email": "ali@gmail.com", "password": "1"},
+    )
+
+    ali_login_response = client.post(
+        "/users/login", data={"username": "ali", "password": "1"}
+    )
+    ali_token = ali_login_response.json()["access_token"]
+
+    ali_create_transaction_response = client.post(
+        "/transactions/create",
+        json={
+            "type": "income",
+            "amount": 100,
+            "category": "salary",
+            "date_": "2026-09-26",
+        },
+        headers={"Authorization": f"Bearer {ali_token}"},
+    )
+    assert ali_create_transaction_response.status_code == 422
+
+
+def test_invalid_category(clean_database):
+    client.post(
+        "/users/create",
+        json={"username": "ali", "email": "ali@gmail.com", "password": "1"},
+    )
+
+    ali_login_response = client.post(
+        "/users/login", data={"username": "ali", "password": "1"}
+    )
+    ali_token = ali_login_response.json()["access_token"]
+
+    ali_create_transaction_response = client.post(
+        "/transactions/create",
+        json={
+            "type": "income",
+            "amount": 100,
+            "category": "whatever",
+            "date_": "2026-08-26",
+        },
+        headers={"Authorization": f"Bearer {ali_token}"},
+    )
+    assert ali_create_transaction_response.status_code == 422
