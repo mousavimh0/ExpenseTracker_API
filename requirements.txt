@@ -35,3 +35,5 @@ truststore==0.10.4
 typing-inspection==0.4.2
 typing_extensions==4.16.0
 uvicorn==0.51.0
+psycopg==3.3.4
+psycopg-binary==3.3.4

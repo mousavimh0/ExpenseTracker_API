@@ -7,7 +7,7 @@ from main import app
 from app.database import Base, get_db
 
 TEST_DATABASE_URL = (
-    "postgresql+psycopg://expense_user:33338020@localhost/expense_tracker_test"
+    "postgresql+psycopg://expense_user:33338020@db:5432/expense_tracker_test"
 )
 
 test_engine = create_engine(TEST_DATABASE_URL)

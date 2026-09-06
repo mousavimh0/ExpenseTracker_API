@@ -1,0 +1,20 @@
+services:
+    api:
+        build: .
+        env_file:
+            - .env
+        environment:
+            DATABASE_URL: postgresql+psycopg://expense_user:33338020@db:5432/expense_tracker
+        ports:
+            - "8000:8000"
+    db:
+        image: postgres:17
+        environment:
+            POSTGRES_USER: expense_user
+            POSTGRES_PASSWORD: 33338020
+            POSTGRES_DB: expense_tracker
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+volumes:
+    postgres_data:
+
