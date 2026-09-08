@@ -43,12 +43,12 @@ jobs:
             - name: Install dependencies
               run: pip install -r requirements.txt
 
-            - name: Create main database
+            - name: Create test database
               run: |
                   PGPASSWORD=postgres psql \
                     -h localhost \
                     -U expense_user \
-                    -d expense_tracker_test \
+                    -d expense_tracker \
                     -c "CREATE DATABASE expense_tracker_test;"
 
             - name: Run tests
