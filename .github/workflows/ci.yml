@@ -38,5 +38,11 @@ jobs:
             - name: Install dependencies
               run: pip install -r requirements.txt
 
+            - name: Check project files
+              run: |
+                  pwd
+                  ls -la
+                  find . -maxdepth 2 -type f
+
             - name: Run tests
               run: pytest
