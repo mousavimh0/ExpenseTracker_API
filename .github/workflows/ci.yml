@@ -10,6 +10,7 @@ jobs:
 
         env:
             TEST_DATABASE_URL: postgresql+psycopg://expense_user:postgres@localhost:5432/expense_tracker_test
+            PYTHONPATH: .
 
         services:
             postgres:
@@ -37,12 +38,6 @@ jobs:
 
             - name: Install dependencies
               run: pip install -r requirements.txt
-
-            - name: Check project files
-              run: |
-                  pwd
-                  ls -la
-                  find . -maxdepth 2 -type f
 
             - name: Run tests
               run: pytest
