@@ -1,5 +1,7 @@
 # Expense Tracker API
 
+![CI](https://github.com/mousavimh0/ExpenseTracker_API/actions/workflows/ci.yml/badge.svg)
+
 A RESTful API for tracking personal income and expenses, built with FastAPI, SQLAlchemy, PostgreSQL, and Alembic.
 
 ## Features
@@ -22,6 +24,9 @@ A RESTful API for tracking personal income and expenses, built with FastAPI, SQL
 * PostgreSQL database support
 * Automated API tests
 * Docker and Docker Compose support
+* Continuous Integration with GitHub Actions
+
+---
 
 ## Tech Stack
 
@@ -38,6 +43,7 @@ A RESTful API for tracking personal income and expenses, built with FastAPI, SQL
 * Docker
 * Docker Compose
 * pytest
+* GitHub Actions
 
 ---
 
@@ -146,6 +152,8 @@ To create a new migration after changing the SQLAlchemy models:
 alembic revision --autogenerate -m "describe your change"
 ```
 
+Alembic migrations are also executed automatically in the CI pipeline against a fresh PostgreSQL database.
+
 ---
 
 ## Run Locally
@@ -177,7 +185,7 @@ The Docker environment consists of two services:
 
 Docker Compose creates a private network between these services. The API connects to PostgreSQL using the service name `db`.
 
-The PostgreSQL data is stored in a named Docker volume so that database data persists when the containers are recreated.
+PostgreSQL data is stored in a named Docker volume so that database data persists when the containers are recreated.
 
 ### Start the Application
 
@@ -231,13 +239,13 @@ docker compose down
 
 The PostgreSQL named volume is preserved by default.
 
-To remove the containers **and** the database volume:
+To remove the containers and the database volume:
 
 ```bash
 docker compose down -v
 ```
 
-> Warning: `docker compose down -v` deletes the PostgreSQL data stored in the Docker volume.
+> **Warning:** `docker compose down -v` deletes the PostgreSQL data stored in the Docker volume.
 
 ---
 
@@ -245,15 +253,19 @@ docker compose down -v
 
 After running the project, visit:
 
+### Swagger UI
+
 ```text
 http://127.0.0.1:8000/docs
 ```
 
-FastAPI also provides ReDoc:
+### ReDoc
 
 ```text
 http://127.0.0.1:8000/redoc
 ```
+
+FastAPI provides both interfaces automatically for exploring and testing the API.
 
 ---
 
@@ -271,9 +283,9 @@ The API uses JWT Bearer Authentication.
 Bearer <your_access_token>
 ```
 
-The JWT token contains user identity information and role information.
+The JWT contains user identity and role information.
 
-All protected endpoints require authentication.
+Protected endpoints require authentication.
 
 ---
 
@@ -281,19 +293,18 @@ All protected endpoints require authentication.
 
 The API implements Role-Based Access Control.
 
-Available roles:
+### `user`
 
-* `user`
+* Default role assigned to newly registered users.
+* Can manage their own transactions.
+* Cannot access other users' protected data.
 
-  * Default role assigned to newly registered users.
-  * Can manage their own transactions.
+### `admin`
 
-* `admin`
+* Has administrative privileges.
+* Can access protected user management endpoints.
 
-  * Has administrative privileges.
-  * Can access protected user management endpoints.
-
-Role-based access is handled using FastAPI dependencies to restrict access to specific endpoints.
+Role-based access is implemented using FastAPI dependencies to restrict access to specific endpoints.
 
 ---
 
@@ -305,13 +316,37 @@ Database schema changes are managed using Alembic migrations.
 
 When running locally, the application reads the database configuration from `.env`.
 
-When running with Docker Compose, the API connects to the PostgreSQL container through the Docker Compose network.
+When running with Docker Compose, the API connects to PostgreSQL through the Docker Compose network using the database service name:
+
+```text
+db
+```
+
+The project uses separate databases for application data and automated tests.
+
+```text
+expense_tracker
+└── Main application database
+
+expense_tracker_test
+└── Test database
+```
+
+The test database is isolated from the main application database to prevent tests from modifying application data.
 
 ---
 
 ## Testing
 
-The test suite uses a separate PostgreSQL database to avoid modifying the main application database.
+The project uses `pytest` for automated API testing.
+
+The test suite uses a separate PostgreSQL database:
+
+```text
+expense_tracker_test
+```
+
+This prevents tests from modifying the main application database.
 
 ### Run tests locally
 
@@ -329,13 +364,58 @@ The test suite covers:
 
 * Authentication
 * User registration and login
+* Invalid login credentials
 * User management
 * RBAC authorization
 * Transaction CRUD operations
 * Transaction ownership
 * Transaction validation
 * Pagination
-* PostgreSQL data persistence
+* PostgreSQL database interaction
+* User-specific data isolation
+
+---
+
+## Continuous Integration
+
+The project uses **GitHub Actions** for Continuous Integration.
+
+The CI workflow runs automatically on:
+
+* Pushes to the repository
+* Pull requests
+
+The pipeline performs the following steps:
+
+```text
+Checkout code
+      ↓
+Set up Python 3.13
+      ↓
+Install dependencies
+      ↓
+Start PostgreSQL 17
+      ↓
+Create application database
+      ↓
+Create test database
+      ↓
+Run Alembic migrations
+      ↓
+Run pytest
+      ↓
+Build Docker image
+```
+
+The CI pipeline ensures that:
+
+* The project can be installed successfully.
+* PostgreSQL is configured correctly.
+* Database migrations work on a fresh database.
+* Automated tests pass.
+* The Docker image can be built successfully.
+
+The CI status is displayed by the badge at the top of this README.
 
 ---
 
@@ -370,6 +450,9 @@ ExpenseTracker_API/
 │   └── database.py
 ├── migrations/
 ├── tests/
+├── docker/
+│   └── postgres/
+│       └── init/
 ├── .dockerignore
 ├── .env.example
 ├── .gitignore
@@ -386,7 +469,11 @@ ExpenseTracker_API/
 ## Future Improvements
 
 * Refresh tokens
-* CI/CD
+* CI/CD deployment pipeline
 * Production deployment
 * Improved Docker health checks
+* API rate limiting
+* Production configuration management
+* API versioning
+* Monitoring and logging
 
