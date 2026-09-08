@@ -51,5 +51,8 @@ jobs:
                     -d expense_tracker \
                     -c "CREATE DATABASE expense_tracker_test;"
 
+            - name: Run migrations
+              run: alembic upgrade head
+
             - name: Run tests
               run: pytest
