@@ -17,6 +17,8 @@ MarkupSafe==3.0.3
 packaging==26.3
 passlib==1.7.4
 pluggy==1.6.0
+psycopg==3.3.4
+psycopg-binary==3.3.4
 pyasn1==0.6.4
 pydantic==2.13.4
 pydantic-settings==2.14.2
@@ -26,6 +28,7 @@ pytest==9.1.1
 python-dotenv==1.2.2
 python-jose==3.5.0
 python-multipart==0.0.32
+redis==8.1.0
 rsa==4.9.1
 ruff==0.16.0
 six==1.17.0
@@ -35,5 +38,3 @@ truststore==0.10.4
 typing-inspection==0.4.2
 typing_extensions==4.16.0
 uvicorn==0.51.0
-psycopg==3.3.4
-psycopg-binary==3.3.4

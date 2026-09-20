@@ -1,11 +1,14 @@
 import os
 import pytest
 
+from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from main import app
 from app.database import Base, get_db
+
+load_dotenv()
 
 TEST_DATABASE_URL = os.getenv("TEST_DATABASE_URL")
 

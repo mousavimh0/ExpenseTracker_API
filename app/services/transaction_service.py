@@ -6,6 +6,8 @@ from app.repositories import transaction_repository, user_repository
 from app.models.db_models import TransactionDB, UserDB
 from app.core import exeptions
 
+from app.redis import redis_client
+
 
 def show_transactions(db: Session, user_id, skip, limit) -> list[TransactionDB]:
     transactions = transaction_repository.select_all(db, user_id, skip, limit)
@@ -20,6 +22,8 @@ def add_transaction(transaction: Transaction, db: Session, user_id):
     new_transaction = transaction_repository.insert_transaction(
         transaction, db, user_id
     )
+    cache_key = f"report:balance:user:{user_id}"
+    redis_client.delete(cache_key)
     return new_transaction
 
 
@@ -28,11 +32,15 @@ def update_transaction(transaction: Transaction, id: int, db: Session, user_id):
     updating_transaction = transaction_repository.update_transaction(
         transaction, id, db, user_id
     )
+    cache_key = f"report:balance:user:{user_id}"
+    redis_client.delete(cache_key)
     return updating_transaction
 
 
 def delete_transaction(id: int, db: Session, user_id):
     transaction_repository.delete_transaction(id, db, user_id)
+    cache_key = f"report:balance:user:{user_id}"
+    redis_client.delete(cache_key)
 
 
 def show_transactions_by_id(id: int, db: Session, user_id) -> dict:
