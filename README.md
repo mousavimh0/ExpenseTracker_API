@@ -2,7 +2,7 @@
 
 ![CI](https://github.com/mousavimh0/ExpenseTracker_API/actions/workflows/ci.yml/badge.svg)
 
-A RESTful API for tracking personal income and expenses, built with FastAPI, SQLAlchemy, PostgreSQL, and Alembic.
+A RESTful API for tracking personal income and expenses, built with FastAPI, SQLAlchemy, PostgreSQL, Redis, and Alembic.
 
 ## Features
 
@@ -16,12 +16,15 @@ A RESTful API for tracking personal income and expenses, built with FastAPI, SQL
 * Update your own transactions
 * Delete your own transactions
 * Generate financial reports
+* Redis caching for financial reports
+* Cache invalidation after transaction changes
 * Filter transactions
 * Pagination
 * User-specific data isolation
 * Admin-only user management endpoints
 * Database schema versioning with Alembic
 * PostgreSQL database support
+* Redis support
 * Automated API tests
 * Docker and Docker Compose support
 * Continuous Integration with GitHub Actions
@@ -35,6 +38,7 @@ A RESTful API for tracking personal income and expenses, built with FastAPI, SQL
 * SQLAlchemy
 * Alembic
 * PostgreSQL
+* Redis
 * Pydantic
 * python-jose (JWT)
 * Passlib
@@ -129,12 +133,105 @@ Example:
 
 ```env
 DATABASE_URL=postgresql+psycopg://expense_user:your_password@localhost:5432/expense_tracker
+TEST_DATABASE_URL=postgresql+psycopg://expense_user:your_password@localhost:5432/expense_tracker_test
 SECRET_KEY=your_secret_key
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
+REDIS_HOST=localhost
 ```
 
 Do not commit the `.env` file to Git.
+
+---
+
+## Redis
+
+Redis is used as a cache for the financial balance report.
+
+The main cached endpoint is:
+
+```text
+GET /report/
+```
+
+Calculating the balance requires database queries to calculate total income and total expenses. Redis temporarily stores the calculated result so repeated requests can avoid performing the same database queries again.
+
+### Cache Key
+
+The cache key is user-specific:
+
+```text
+report:balance:user:{user_id}
+```
+
+For example:
+
+```text
+report:balance:user:12
+```
+
+Including the user ID in the cache key prevents cached financial data from being shared between different users.
+
+### Cache TTL
+
+The cached balance has a TTL of **60 seconds**.
+
+After 60 seconds, Redis automatically expires the cached value. The next request calculates the balance again from PostgreSQL and creates a new cache entry.
+
+### Cache Invalidation
+
+The balance cache is deleted whenever the user's transaction data changes:
+
+* Creating a transaction
+* Updating a transaction
+* Deleting a transaction
+
+The next request to `/report/` therefore calculates the balance using the latest PostgreSQL data.
+
+### Cache Flow
+
+```text
+GET /report/
+      │
+      ▼
+Check Redis
+      │
+      ├── Cache HIT ──► Return cached balance
+      │
+      └── Cache MISS
+              │
+              ▼
+        Query PostgreSQL
+              │
+              ▼
+        Calculate balance
+              │
+              ▼
+        Store result in Redis
+              │
+              ▼
+        Return balance
+```
+
+PostgreSQL remains the source of truth. Redis is only used as a temporary cache.
+
+### Redis Configuration
+
+The Redis host is configured through the `REDIS_HOST` environment variable.
+
+For local execution:
+
+```env
+REDIS_HOST=localhost
+```
+
+When the API runs inside Docker Compose:
+
+```env
+REDIS_HOST=redis
+```
+
+The value `redis` is the Docker Compose service name.
 
 ---
 
@@ -170,20 +267,23 @@ The API will be available at:
 http://127.0.0.1:8000
 ```
 
+When running locally, PostgreSQL and Redis must be available and their connection settings must be configured in `.env`.
+
 ---
 
 # Docker
 
-The project includes Docker and Docker Compose configuration for running the FastAPI application and PostgreSQL database in containers.
+The project includes Docker and Docker Compose configuration for running the FastAPI application, PostgreSQL database, and Redis cache in containers.
 
 ### Architecture
 
-The Docker environment consists of two services:
+The Docker environment consists of three services:
 
 * `api` — FastAPI application
 * `db` — PostgreSQL database
+* `redis` — Redis cache
 
-Docker Compose creates a private network between these services. The API connects to PostgreSQL using the service name `db`.
+Docker Compose creates a private network between these services. The API connects to PostgreSQL using the service name `db` and to Redis using the service name `redis`.
 
 PostgreSQL data is stored in a named Docker volume so that database data persists when the containers are recreated.
 
@@ -199,6 +299,14 @@ Check the running containers:
 
 ```bash
 docker compose ps
+```
+
+The running services should include:
+
+```text
+api
+db
+redis
 ```
 
 ### Run Database Migrations
@@ -227,7 +335,7 @@ Run the complete test suite inside the API container:
 docker compose exec api pytest
 ```
 
-The tests use a separate PostgreSQL test database.
+The tests use a separate PostgreSQL test database. Redis is also available to the test environment through the Docker Compose network.
 
 ### Stop the Application
 
@@ -348,6 +456,12 @@ expense_tracker_test
 
 This prevents tests from modifying the main application database.
 
+Redis-related tests verify:
+
+* Redis connectivity
+* Cache creation after a report request
+* Cache HIT behavior on repeated report requests
+
 ### Run tests locally
 
 ```bash
@@ -373,6 +487,7 @@ The test suite covers:
 * Pagination
 * PostgreSQL database interaction
 * User-specific data isolation
+* Redis caching
 
 ---
 
@@ -396,7 +511,7 @@ Install dependencies
       ↓
 Start PostgreSQL 17
       ↓
-Create application database
+Start Redis 7
       ↓
 Create test database
       ↓
@@ -411,8 +526,10 @@ The CI pipeline ensures that:
 
 * The project can be installed successfully.
 * PostgreSQL is configured correctly.
+* Redis is available to the application.
 * Database migrations work on a fresh database.
 * Automated tests pass.
+* Redis-related tests pass.
 * The Docker image can be built successfully.
 
 The CI status is displayed by the badge at the top of this README.
@@ -426,54 +543,6 @@ The project uses environment variables for configuration.
 Create a `.env` file based on `.env.example`:
 
 ```env
-DATABASE_URL=postgresql+psycopg://expense_user:your_password@localhost:5432/expense_tracker
-SECRET_KEY=your_secret_key
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
+DATABASE_URL=postgresql+psycopg://expense_user:your_password@localhost:5432/_
 ```
-
-The `.env` file contains local configuration and secrets and should not be committed to Git.
-
----
-
-## Project Structure
-
-```text
-ExpenseTracker_API/
-├── app/
-│   ├── core/
-│   ├── models/
-│   ├── repositories/
-│   ├── routers/
-│   ├── schemas/
-│   ├── services/
-│   └── database.py
-├── migrations/
-├── tests/
-├── docker/
-│   └── postgres/
-│       └── init/
-├── .dockerignore
-├── .env.example
-├── .gitignore
-├── Dockerfile
-├── compose.yaml
-├── alembic.ini
-├── main.py
-├── requirements.txt
-└── README.md
-```
-
----
-
-## Future Improvements
-
-* Refresh tokens
-* CI/CD deployment pipeline
-* Production deployment
-* Improved Docker health checks
-* API rate limiting
-* Production configuration management
-* API versioning
-* Monitoring and logging
 
