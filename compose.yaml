@@ -1,11 +1,12 @@
 services:
     api:
         build: .
-        env_file:
-            - .env
         environment:
-            DATABASE_URL: postgresql+psycopg://expense_user:33338020@db:5432/expense_tracker
-            TEST_DATABASE_URL: postgresql+psycopg://expense_user:33338020@db:5432/expense_tracker_test
+            DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+            TEST_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}_test
+            SECRET_KEY: ${SECRET_KEY}
+            ALGORITHM: ${ALGORITHM}
+            ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
             REDIS_HOST: redis
         ports:
             - "8000:8000"
@@ -13,9 +14,11 @@ services:
     db:
         image: postgres:17
         environment:
-            POSTGRES_USER: expense_user
-            POSTGRES_PASSWORD: 33338020
-            POSTGRES_DB: expense_tracker
+            POSTGRES_USER: ${POSTGRES_USER}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+            POSTGRES_DB: ${POSTGRES_DB}
+        ports:
+            - "5432:5432"
         volumes:
             - postgres_data:/var/lib/postgresql/data
             - ./docker/postgres/init:/docker-entrypoint-initdb.d
