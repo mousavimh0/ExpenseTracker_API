@@ -2,6 +2,7 @@ import redis
 from fastapi.testclient import TestClient
 from main import app
 from app.redis import redis_client
+from unittest.mock import patch
 
 test_redis_client = redis.Redis(
     host="localhost",
@@ -92,10 +93,13 @@ def test_report_cache_hit(clean_database):
     first_response = client.get(
         "/report/", headers={"Authorization": f"Bearer {token}"}
     )
-    second_response = client.get(
-        "/report/", headers={"Authorization": f"Bearer {token}"}
-    )
-
+    with patch(
+        "app.services.report_service.report_repository.sum_amount"
+    ) as mocck_sum_amount:
+        second_response = client.get(
+            "/report/", headers={"Authorization": f"Bearer {token}"}
+        )
+    mocck_sum_amount.assert_not_called()
     user_id = user_register.json()["id"]
 
     assert first_response.json() == second_response.json()
